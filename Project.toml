@@ -1,0 +1,7 @@
+name = "EchelleSpectra"
+uuid = "e42e2a4f-7e48-49c4-9e9a-180127d117fc"
+authors = ["Bryson Cale <bryson.cale1@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
