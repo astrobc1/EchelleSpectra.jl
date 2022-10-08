@@ -1,7 +1,4 @@
 using PyCall
-using AstroTime
-using EchelleUtils
-using EchelleSpectra
 
 
 export compute_barycentric_corrections, get_exposure_midpoint, get_barycentric_velocity, get_barycentric_corrections
