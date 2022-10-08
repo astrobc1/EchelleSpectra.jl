@@ -5,7 +5,7 @@ export SpecData, SpecData1d, SpecData2d, Echellogram, RawSpecData2d, MasterCal2d
 export get_spectrograph, get_spec_module
 export read_header, read_image, read_spec1d
 export get_orders, ordermin, ordermax
-export parse_exposure_start_time, parse_itime, parse_object, parse_sky_coord, parse_utdate, parse_airmass
+export parse_exposure_start_time, parse_itime, parse_object, parse_sky_coord, parse_utdate, parse_airmass, parse_image_num
 
 """
 An abstract type for all spectral data, both 2d echellograms and extracted 1d spectra, parametrized by the spectrograph symbol S.
