@@ -35,7 +35,8 @@ function get_λsolution_estimate end
 Compute the barycentric corrections using barycorrpy for the observation `data`. The `star_name` must be a recognized by simbad. If `store=true`, the variable data.header is updated with the BJD and velocity correction (bjd) and (bc_vel).
 Returns the BJD and velocity correction as a tuple.
 """
-function compute_barycentric_corrections(data::SpecData, star_name=nothing, obs_name=nothing; store=true)
+function compute_barycentric_corrections(data::SpecData, star_name=nothing, obs_name=nothing; store=true, zmeas=0.0)
+    
     if isnothing(star_name)
         spec_mod = get_spec_module(data)
         star_name = parse_object(data)
@@ -49,7 +50,7 @@ function compute_barycentric_corrections(data::SpecData, star_name=nothing, obs_
     end
     
     # BJD and BC vel
-    bjd, bc_vel = compute_barycentric_corrections(jdmid, obs_name, star_name)
+    bjd, bc_vel = compute_barycentric_corrections(jdmid, obs_name, star_name, zmeas=zmeas)
     if store
         data.header["bjd"] = bjd
         data.header["bc_vel"] = bc_vel
@@ -57,9 +58,9 @@ function compute_barycentric_corrections(data::SpecData, star_name=nothing, obs_
     return bjd, bc_vel
 end
 
-function compute_barycentric_corrections(jdmid::Float64, obs_name::String, star_name::String)
-    barycorrpy = pyimport("barycorrpy")
-    bjd = barycorrpy.utc_tdb.JDUTC_to_BJDTDB(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true)[1][1]
-    bc_vel = barycorrpy.get_BC_vel(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true)[1][1]
+function compute_barycentric_corrections(jdmid::Float64, obs_name::String, star_name::String; zmeas::Real=0)
+    BARYCORRPY = pyimport("barycorrpy")
+    bjd = BARYCORRPY.utc_tdb.JDUTC_to_BJDTDB(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true)[1][1]
+    bc_vel = BARYCORRPY.get_BC_vel(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true, zmeas=zmeas)[1][1]
     return bjd, bc_vel
 end
