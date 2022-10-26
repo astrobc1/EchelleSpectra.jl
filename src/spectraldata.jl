@@ -7,10 +7,29 @@ export read_header, read_image, read_spec1d
 export get_orders, ordermin, ordermax
 export parse_exposure_start_time, parse_itime, parse_object, parse_sky_coord, parse_utdate, parse_airmass, parse_image_num
 
+const StringOrSymbol = Union{String, Symbol}
+
+# Empty fits header
+FITSIO.FITSHeader() = FITSHeader(String[], [], String[])
+
 """
 An abstract type for all spectral data, both 2d echellograms and extracted 1d spectra, parametrized by the spectrograph symbol S.
 """
 abstract type SpecData{S} end
+
+"""
+A concrete type for all spectral data used for dispatch or internal use.
+"""
+mutable struct SpecData1dor2d{S} <: SpecData{S}
+    fname::String
+    header::FITSHeader
+end
+
+function SpecData1dor2d(fname::String, spectrograph::Union{String, Symbol})
+    data = SpecData1dor2d{Symbol(lowercase(spectrograph))}(fname, FITSHeader())
+    data.header = read_header(data)
+    return data
+end
 
 """
 An abstract type for all 2d spectral data (echellograms), parametrized by the spectrograph symbol S.
@@ -63,7 +82,7 @@ end
 Construct a `SpecData1d` object for the filename `fname` for the spectral region `sregion`. lowercase(`spectrograph`) must be a recognized name.
 """
 function SpecData1d(fname::String, spectrograph::String, sregion::SpecRegion1d)
-    data = SpecData1d{Symbol(lowercase(spectrograph))}(fname, FITSHeader(String[], [], String[]), Dict{Union{String, Symbol}, Any}())
+    data = SpecData1d{Symbol(lowercase(spectrograph))}(fname, FITSHeader(), Dict{Union{String, Symbol}, Any}())
     data.header = read_header(data)
     read_spec1d(data, sregion)
     return data
@@ -98,7 +117,7 @@ end
 Construct a RawSpecData2d object with filename fname recorded with the spectrograph `spectrograph`.
 """
 function RawSpecData2d(fname::String, spectrograph::Union{String, Symbol})
-    data = RawSpecData2d{Symbol(lowercase(spectrograph))}(fname, FITSHeader(String[], [], String[]))
+    data = RawSpecData2d{Symbol(lowercase(spectrograph))}(fname, FITSHeader())
     data.header = read_header(data)
     return data
 end
@@ -203,3 +222,13 @@ function parse_airmass end
 Parses the image number (if relevant) for a given exposure.
 """
 function parse_image_num end
+
+
+# From file defaults
+parse_itime(fname::String, spectrograph::String) = parse_itime(SpecData1dor2d{Symbol(lowercase(spectrograph))}(fname, FITSHeader()))
+parse_object(fname::String, spectrograph::String) = parse_object(SpecData1dor2d{Symbol(lowercase(spectrograph))}(fname, FITSHeader()))
+parse_utdate(fname::String, spectrograph::String) = parse_utdate(SpecData1dor2d{Symbol(lowercase(spectrograph))}(fname, FITSHeader()))
+parse_sky_coord(fname::String, spectrograph::String) = parse_sky_coord(SpecData1dor2d{Symbol(lowercase(spectrograph))}(fname, FITSHeader()))
+parse_exposure_start_time(fname::String, spectrograph::String) = parse_exposure_start_time(SpecData1dor2d{Symbol(lowercase(spectrograph))}(fname, FITSHeader()))
+parse_airmass(fname::String, spectrograph::String) = parse_airmass(SpecData1dor2d{Symbol(lowercase(spectrograph))}(fname, FITSHeader()))
+parse_image_num(fname::String, spectrograph::String) = parse_image_num(SpecData1dor2d{Symbol(lowercase(spectrograph))}(fname, FITSHeader()))
