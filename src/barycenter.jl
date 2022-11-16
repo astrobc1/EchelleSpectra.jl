@@ -1,41 +1,34 @@
+
+# Imports
 using PyCall
 
-
-export compute_barycentric_corrections, get_exposure_midpoint, get_barycentric_velocity, get_barycentric_corrections
+# Exports
+export get_exposure_midpoint, get_barycentric_velocity, get_barycentric_corrections, compute_barycentric_corrections
 
 """
     get_exposure_midpoint
-Gets the exposure midpoint.
+Gets the exposure midpoint for an observation.
 """
 function get_exposure_midpoint end
 
 """
     get_barycentric_velocity
-Gets the barycentric velocity correction.
+Gets the barycentric velocity correction for an observation.
 """
 function get_barycentric_velocity end
 
 """
     get_barycentric_corrections
-Gets the barycentric Julian date and velocity correction.
+Gets the barycentric Julian date and velocity correction for an observation.
 """
 function get_barycentric_corrections end
 
-# Wavelength info
-
 """
-    get_λsolution_estimate
-Gets an estimate for the wavelength solution. The precision of the returned grid will be subject to the stability of the spectrograph.
+    compute_barycentric_corrections(data::SpecData; star_name=nothing, obs_name=nothing, store=true, zmeas=0.0)
+Compute the barycentric corrections using barycorrpy via PyCall for the observation `data`. The `star_name` must be a recognized by simbad. If `store=true`, the variable data.header is updated with keys bjd and bc_vel for the BJD and velocity correction.
+Also resturn the BJD and velocity correction as a tuple.
 """
-function get_λsolution_estimate end
-
-"""
-    compute_barycentric_corrections(data::SpecData, star_name=nothing, obs_name=nothing; store=true)
-    compute_barycentric_corrections(jdmid::Float64, obs_name::String, star_name::String)
-Compute the barycentric corrections using barycorrpy for the observation `data`. The `star_name` must be a recognized by simbad. If `store=true`, the variable data.header is updated with the BJD and velocity correction (bjd) and (bc_vel).
-Returns the BJD and velocity correction as a tuple.
-"""
-function compute_barycentric_corrections(data::SpecData, star_name=nothing, obs_name=nothing; store=true, zmeas=0.0)
+function compute_barycentric_corrections(data::SpecData; star_name=nothing, obs_name=nothing, store=true, zmeas=0.0)
     
     if isnothing(star_name)
         spec_mod = get_spec_module(data)
@@ -58,7 +51,7 @@ function compute_barycentric_corrections(data::SpecData, star_name=nothing, obs_
     return bjd, bc_vel
 end
 
-function compute_barycentric_corrections(jdmid::Float64, obs_name::String, star_name::String; zmeas::Real=0)
+function compute_barycentric_corrections(jdmid::Real, obs_name::String, star_name::String; zmeas::Real=0)
     BARYCORRPY = pyimport("barycorrpy")
     bjd = BARYCORRPY.utc_tdb.JDUTC_to_BJDTDB(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true)[1][1]
     bc_vel = BARYCORRPY.get_BC_vel(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true, zmeas=zmeas)[1][1]
