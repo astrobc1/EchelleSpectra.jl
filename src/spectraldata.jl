@@ -13,18 +13,25 @@ export get_orders, ordermin, ordermax
 FITSIO.FITSHeader() = FITSHeader(String[], [], String[])
 
 """
-An abstract type for all spectral data, both 2d echellograms and extracted 1d spectra, parametrized by the spectrograph symbol S.
+An abstract type for all Echelle spectra, parametrized by the spectrograph symbol S.
 """
 abstract type SpecData{S} end
 
 """
-An abstract type for all echellograms.
+An abstract type for all 2d spectra with alias `Echellogram`.
 """
 abstract type SpecData2d{S} <: SpecData{S} end
 const Echellogram{S} = SpecData2d{S}
 
 """
-A concrete type for all spectral data used for dispatch or internal use.
+A concrete type for all spectral data used for dispatching. All parsing methods are also implemented as `parse_something(fname::String, spectrograph::String) = parse_something(SpecData1dor2d(fname, spectrograph))`.
+
+# Fields:
+- `fname::String` The path + filename.
+- `header::FITSHeader` The fits header.
+
+# Constructors
+SpecData1dor2d(fname::String, spectrograph::Union{String, Symbol})
 """
 struct SpecData1dor2d{S} <: SpecData{S}
     fname::String
@@ -32,24 +39,27 @@ struct SpecData1dor2d{S} <: SpecData{S}
 end
 
 """
-    spectrograph(data::SpecData{S})
-Returns the name of the spectrograph as a string corresponding to this SpecData object.
+    get_spectrograph(data::SpecData)
+Returns the name of the spectrograph for this SpecData object as a string.
 """
-get_spectrograph(data::SpecData{S}) where {S} = String(typeof(data).parameters[1])
+get_spectrograph(data::SpecData{S}) where {S} = string(S)
 
 """
-    get_spec_module(data::SpecData{S})
+    get_spec_module(::SpecData{S})
 Returns the module for this spectrograph.
 """
 function get_spec_module(::SpecData{S}) where {S} end
 
 """
-Contains the data and metadata for 1d spectra, parametrized by the spectrograph symbol `S`.
+Concrete type for 1D (extracted) spectral data.
 
 # Fields
-- `fname::String` The filename.
-- `header::FITSHeader` The fits header.
-- `data::Dict{Union{String, Symbol}, Any}` A Dictionary containing the data products.
+- `fname::String`: The path + filename.
+- `header::FITSHeader`: The fits header.
+- `data::Dict{Union{String, Symbol}, Any}` :A Dictionary containing the relevant data products. Default keys are "flux" for the 1D spectrum, "fluxerr" for the uncertainty, and "λ" for the wavelength grid. These variables can be set or retreived via `data.flux`, `data.fluxerr`, and `data.λ`
+
+# Constructors
+SpecData1d(fname::String, spectrograph::String, sregion::SpecRegion1d)
 """
 struct SpecData1d{S} <: SpecData{S}
     fname::String
@@ -76,10 +86,6 @@ function Base.setproperty!(d::SpecData1d, key::Symbol, val)
 end
 
 
-"""
-    SpecData1d(fname::String, spectrograph::String, sregion::SpecRegion1d)
-Construct a `SpecData1d` object for the filename `fname` for the spectral region `sregion`. lowercase(`spectrograph`) must be a recognized name.
-"""
 function SpecData1d(fname::String, spectrograph::String, sregion::SpecRegion1d)
     data = SpecData1d{Symbol(lowercase(spectrograph))}(fname, FITSHeader(), Dict{Union{String, Symbol}, Any}())
     merge!(data.header, read_header(data))
@@ -88,21 +94,21 @@ function SpecData1d(fname::String, spectrograph::String, sregion::SpecRegion1d)
 end
 
 """
-A SpecData2d object.
+Concrete type for a raw echellogram (i.e. not coadded science or calibration image).
 
 # Fields
 - `fname::String` The filename.
 - `header::FITSHeader` The fits header.
+
+# Constructors
+RawSpecData2d(fname::String, spectrograph::Union{String, Symbol})
 """
 struct RawSpecData2d{S} <: SpecData2d{S}
     fname::String
     header::FITSHeader
 end
 
-"""
-    SpecData2d(fname::String, spectrograph::Union{String, Symbol})
-Construct a SpecData2d object with filename fname recorded with the spectrograph `spectrograph`.
-"""
+
 function RawSpecData2d(fname::String, spectrograph::Union{String, Symbol})
     data = RawSpecData2d{Symbol(lowercase(spectrograph))}(fname, FITSHeader())
     merge!(data.header, read_header(data))
@@ -110,29 +116,26 @@ function RawSpecData2d(fname::String, spectrograph::Union{String, Symbol})
 end
 
 """
-A MasterCal2d.
+Concrete type for a master calibration frame which is constructed by coadding (reducing) multiple individual echellograms.
 
 # Fields
 - `fname::String` The filename.
-- `group::Vector{SpecData2d{S}}` The vector of individual SpecData objects used to generate this frame.
+- `group::Vector{SpecData2d{S}}` The individual `SpecData2d` objects used to generate this frame.
+
+# Constructors
+MasterCal2d(fname::String, group::Vector{<:SpecData2d{S}}) where {S}
 """
 struct MasterCal2d{S} <: SpecData2d{S}
     fname::String
     group::Vector{SpecData2d{S}}
 end
 
-"""
-    MasterCal2d(fname::String, group::Vector{<:SpecData2d{S}}) where {S}
-Construct a MasterCal2d object with filename fname (file possibly not yet generated) from the `group` of individual frames.
-"""
+
 function MasterCal2d(fname::String, group::Vector{<:SpecData2d{S}}) where {S}
     data = MasterCal2d{Symbol(get_spectrograph(group[1]))}(fname, group)
     return data
 end
 
-"""
-    Echellogram is an alias for SpecData2d.
-"""
 const Echellogram = SpecData2d
 
 function SpecData1dor2d(fname::String, spectrograph::Union{String, Symbol})
@@ -149,71 +152,60 @@ Base.show(io::IO, d::MasterCal2d) = print(io, "MasterCal2d: $(basename(d.fname))
 
 # Equality
 """
-    Base.:(==)(d1::SpecData{T}, d2::SpecData{V})
-Determines if two SpecData objects are identical by comparing their filenames.
+    ==(d1::SpecData, d2::SpecData)
+Returns `true` if the fields `fname` are equal, otherwise `false`.
 """
-Base.:(==)(d1::SpecData{T}, d2::SpecData{V}) where {T, V} = d1.fname == d2.fname;
+Base.:(==)(d1::SpecData{T}, d2::SpecData{V}) where {T, V} = d1.fname == d2.fname
 
-# Reading in header and data products
 """
-    read_header
-Primary method to read in the fits header. Must be implemented.
+Reads in a FITS file header.
 """
 function read_header end
 
 """
-    read_image
-Primary method to read in an image. Must be implemented.
+Reads in an image.
 """
 function read_image end
 
 """
-    read_spec1d!
-Primary method to read in a reduced spectrum. Must be implemented.
+Reads in the extracted 1D data for forward modeling, modifying the in-place storage variable `data.data`.
 """
 function read_spec1d! end
 
 # Parsing header and/or filename info
 
 """
-    parse_itime
-Parses the integration (exposure) time for a given exposure.
+Parses the integration (exposure) time.
 """
 function parse_itime end
 
 """
-    parse_object
-Parses the object name for a given exposure.
+Parses the object name.
 """
 function parse_object end
 
 """
-    parse_utdate
-Parses the UT date for a given exposure.
+Parses the UT date, preferably as a typical UT formatted string: `YYYYMMDD`.
 """
 function parse_utdate end
 
 """
-    parse_sky_coord
-Parses the sky coordinate for a given exposure.
+Parses the sky coordinate (may be start/mid/end).
 """
 function parse_sky_coord end
 
 """
-    parse_exposure_start_time
-Parses the exposure start time for a given exposure.
+Parses the exposure start time.
 """
 function parse_exposure_start_time end
 
 """
-    parse_airmass
-Parses the airmass for a given exposure.
+Parses the airmass for a given exposure (may be start/mid/end).
 """
 function parse_airmass end
 
 """
-    parse_image_num
-Parses the image number (if relevant) for a given exposure.
+Parses the observation number (if relevant) (e.g., img0001.fits -> 1).
 """
 function parse_image_num end
 
@@ -245,8 +237,7 @@ function merge_headers_from_empty!(h1::FITSHeader, h2::FITSHeader)
 end
 
 """
-    get_orders
-Default method to return the bounding echelle orders.
+Returns the bounding echelle orders `[order_bottom, order_top]`. Note that `order_bottom` can be larger than `order_top`.
 """
 function get_orders end
 
