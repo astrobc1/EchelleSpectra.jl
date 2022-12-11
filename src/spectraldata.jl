@@ -156,6 +156,9 @@ Base.show(io::IO, d::MasterCal2d) = print(io, "MasterCal2d: $(basename(d.fname))
 Returns `true` if the fields `fname` are equal, otherwise `false`.
 """
 Base.:(==)(d1::SpecData{T}, d2::SpecData{V}) where {T, V} = d1.fname == d2.fname
+Base.length(::SpecData) = 0
+Base.iterate(d::SpecData) = d
+Base.iterate(d::SpecData, ::Any) = d
 
 """
 Reads in a FITS file header.
