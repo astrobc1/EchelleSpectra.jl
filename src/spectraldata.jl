@@ -87,7 +87,7 @@ end
 
 
 function SpecData1d(fname::String, spectrograph::String, sregion::SpecRegion1d)
-    data = SpecData1d{Symbol(lowercase(spectrograph))}(fname, FITSHeader(), Dict{Union{String, Symbol}, Any}())
+    data = SpecData1d{Symbol(lowercase(string(spectrograph)))}(fname, FITSHeader(), Dict{Union{String, Symbol}, Any}())
     merge!(data.header, read_header(data))
     read_spec1d!(data, sregion)
     return data
