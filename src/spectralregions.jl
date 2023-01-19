@@ -1,6 +1,6 @@
 
 # Exports
-export SpecRegion1d, label
+export SpecRegion1d
 
 """
 A type to represent the spectral region for a 1d (extracted) spectrum.
@@ -40,8 +40,8 @@ end
 
 function Base.show(io::IO, sregion::SpecRegion1d)
     if isnothing(sregion.pixrange)
-        println(io, "$(label(sregion)): λ = $(round(sregion.λrange[2], digits=4)) - $(round(sregion.λrange[2], digits=4)) nm")
+        println(io, "$(label(sregion)): λ = $(round(sregion.λrange[1], digits=4)) - $(round(sregion.λrange[2], digits=4)) nm")
     else
-        println(io, "$(label(sregion)): Pixels = $(sregion.pixrange[1]) - $(sregion.pixrange[2]), λ = $(round(sregion.λrange[2], digits=4)) - $(round(sregion.λrange[2], digits=4)) nm")
+        println(io, "$(label(sregion)): Pixels = $(sregion.pixrange[1]) - $(sregion.pixrange[2]), λ = $(round(sregion.λrange[1], digits=4)) - $(round(sregion.λrange[2], digits=4)) nm")
     end
 end
