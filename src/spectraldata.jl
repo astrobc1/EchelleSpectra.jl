@@ -56,7 +56,7 @@ Concrete type for 1D (extracted) spectral data.
 # Fields
 - `fname::String`: The path + filename.
 - `header::FITSHeader`: The fits header.
-- `data::Dict{Union{String, Symbol}, Any}` :A Dictionary containing the relevant data products. Default keys are "flux" for the 1D spectrum, "fluxerr" for the uncertainty, and "λ" for the wavelength grid. These variables can be set or retreived via `data.flux`, `data.fluxerr`, and `data.λ`
+- `data::Dict{Union{String, Symbol}, Any}` :A Dictionary containing the relevant data products. Default keys are "spec" for the 1D spectrum, "specerr" for the uncertainty, and "λ" for the wavelength grid. These variables can be set or retreived via `data.spec`, `data.specerr`, and `data.λ`
 
 # Constructors
 SpecData1d(fname::String, spectrograph::String, sregion::SpecRegion1d)
@@ -78,7 +78,7 @@ function Base.getproperty(d::SpecData1d, key::Symbol)
 end
 
 function Base.setproperty!(d::SpecData1d, key::Symbol, val)
-    if key ∈ [:λ, :flux, :fluxerr]
+    if key ∈ [:λ, :spec, :specerr]
         d.data[string(key)] = val
     else
         setfield!(d, key, val)
