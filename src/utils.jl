@@ -1,12 +1,26 @@
-using AstroLib
+using AstroLib, SkyCoords
 
 export airmass2alt, alt2airmass, radec2altaz
 
-# Sky coord helpers
-airmass2alt(airmass) = π / 2 - asec(airmass)
-alt2airmass(alt) = sec(π / 2 - alt)
 
-function radec2altaz(ra, dec, jd, obsname; spherical=true)
+"""
+    airmass2alt(airmass::Real)
+Convert airmass to altitude in radians.
+"""
+airmass2alt(airmass::Real) = π / 2 - asec(airmass)
+
+"""
+    alt2airmass(alt::Number)
+Convert altitude in radians to airmass.
+"""
+alt2airmass(alt::Real) = sec(π / 2 - alt)
+
+"""
+    radec2altaz(ra::Real, dec::Real, jd::Real, obsname::String; spherical::Bool=true)
+    radec2altaz(coord::ICRSCoords, jd::Real, obsname::String; spherical::Bool=true)
+Convert ra and dec coordinates in degrees to alt/az coordinates for an observatory `obsname` on the date `jd`. If `spherical=true`, the alt/az coordinates are converted to standard spherical coordinates.
+"""
+function radec2altaz(ra::Real, dec::Real, jd::Real, obsname::String; spherical::Bool=true)
 
     # RA/Dec in degrees
     ra_deg = ra * 180 / π
@@ -30,4 +44,4 @@ function radec2altaz(ra, dec, jd, obsname; spherical=true)
     end
 end
 
-radec2altaz(coord, jd, obsname; spherical=true) = radec2altaz(coord.ra, coord.dec, jd, obsname; spherical)
+radec2altaz(coord::ICRSCoords, jd::Real, obsname::String; spherical::Bool=true) = radec2altaz(coord.ra, coord.dec, jd, obsname; spherical)
