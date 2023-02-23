@@ -3,7 +3,7 @@
 using FITSIO
 
 # Exports
-export SpecData, SpecData1d, SpecData2d, Echellogram, RawSpecData2d, MasterCal2d
+export SpecData, SpecData1d, SpecData2d, Echellogram, RawSpecData2d, MedianCal2d
 export get_spectrograph, get_spec_module
 export read_header, read_image, read_spec1d!
 export parse_exposure_start_time, parse_itime, parse_object, parse_sky_coord, parse_utdate, parse_airmass, parse_image_num
@@ -79,6 +79,12 @@ function SpecData1d(fname::String, spectrograph::String, sregion::SpecRegion1d)
     return data
 end
 
+function SpecData1d(fname::String, spectrograph::String)
+    data = SpecData1d{Symbol(lowercase(string(spectrograph)))}(fname, FITSHeader(), Dict{String, Any}())
+    merge!(data.header, read_header(data))
+    return data
+end
+
 """
 Concrete type for a raw echellogram (i.e. not coadded science or calibration image).
 
@@ -102,23 +108,23 @@ function RawSpecData2d(fname::String, spectrograph::String)
 end
 
 """
-Concrete type for a master calibration frame which is constructed by combining multiple individual images.
+Concrete type for a median calibration frame which is constructed by combining multiple individual images.
 
 # Fields
 - `fname::String`: The filename of the combined image, may not be generated yet.
 - `group::Vector{<:SpecData2d}`: The individual `SpecData2d` objects used to generate this frame.
 
 # Constructors
-    MasterCal2d(fname::String, group::Vector{<:SpecData2d})
+    MedianCal2d(fname::String, group::Vector{<:SpecData2d})
 """
-struct MasterCal2d{S} <: SpecData2d{S}
+struct MedianCal2d{S} <: SpecData2d{S}
     fname::String
     group::Vector{SpecData2d{S}}
 end
 
 
-function MasterCal2d(fname::String, group::Vector{<:SpecData2d})
-    data = MasterCal2d{Symbol(get_spectrograph(group[1]))}(fname, group)
+function MedianCal2d(fname::String, group::Vector{<:SpecData2d})
+    data = MedianCal2d{Symbol(get_spectrograph(group[1]))}(fname, group)
     return data
 end
 
@@ -127,7 +133,7 @@ const Echellogram = SpecData2d
 # Print
 Base.show(io::IO, d::SpecData1d) = print(io, "SpecData1d: $(basename(d.fname))")
 Base.show(io::IO, d::RawSpecData2d) = print(io, "RawSpecData2d: $(basename(d.fname))")
-Base.show(io::IO, d::MasterCal2d) = print(io, "MasterCal2d: $(basename(d.fname))")
+Base.show(io::IO, d::MedianCal2d) = print(io, "MedianCal2d: $(basename(d.fname))")
 
 # Useful base methods
 Base.:(==)(d1::SpecData, d2::SpecData) = d1.fname == d2.fname
