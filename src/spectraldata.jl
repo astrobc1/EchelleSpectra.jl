@@ -45,7 +45,7 @@ Concrete type for 1D (extracted) spectral data.
 - `data::Dict{String, Any}` :A Dictionary containing the relevant data products. Default keys are "spec" for the 1D spectrum, "specerr" for the uncertainty, and "λ" for the wavelength grid. These variables can be set or retreived via `data.spec`, `data.specerr`, and `data.λ`
 
 # Constructors
-    SpecData1d(fname::String, spectrograph::String, sregion::SpecRegion1d)
+    SpecData1d(fname::String, spectrograph::String)
 """
 struct SpecData1d{S} <: SpecData{S}
     fname::String
@@ -69,14 +69,6 @@ function Base.setproperty!(d::SpecData1d, key::Symbol, val)
     else
         setfield!(d, key, val)
     end
-end
-
-
-function SpecData1d(fname::String, spectrograph::String, sregion::SpecRegion1d)
-    data = SpecData1d{Symbol(lowercase(string(spectrograph)))}(fname, FITSHeader(), Dict{String, Any}())
-    merge!(data.header, read_header(data))
-    read_spec1d!(data, sregion)
-    return data
 end
 
 function SpecData1d(fname::String, spectrograph::String)
@@ -150,7 +142,7 @@ Reads in an image.
 function read_image end
 
 """
-Reads in the extracted 1D data. By default, this method is called as `read_spec1d!(data::SpecData1d, sregion::SpecRegion1d)`. The fields `data.λ`, `data.spec`, and `data.specerr` should be set here, but only data.spec is required.
+Reads in the extracted 1D data.
 """
 function read_spec1d! end
 
@@ -238,7 +230,7 @@ ordermax(data::SpecData) = maximum(get_orders(data))
 
 
 """
-    get_λsolution_estimate(data::SpecData1d, ::SpecRegion1d)
-Returns the approximate wavelength solution for a 1D spectrum. For spectral modeling purposes, this should be within accurate to within 1-2 detector pixels.
+    get_λsolution_estimate
+Returns the approximate wavelength solution for a 1D spectrum. For spectral modeling purposes, this should typically be accurate to within 1-2 detector pixels.
 """
-get_λsolution_estimate(data::SpecData1d, sregion::SpecRegion1d) = data.λ
+function get_λsolution_estimate end
