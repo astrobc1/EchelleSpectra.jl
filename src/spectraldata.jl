@@ -64,7 +64,7 @@ function Base.getproperty(d::SpecData1d, key::Symbol)
 end
 
 function Base.setproperty!(d::SpecData1d, key::Symbol, val)
-    if key ∈ [:λ, :spec, :specerr]
+    if key ∈ (:λ, :spec, :specerr)
         d.data[string(key)] = val
     else
         setfield!(d, key, val)
