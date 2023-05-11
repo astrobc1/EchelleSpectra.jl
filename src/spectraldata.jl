@@ -1,17 +1,10 @@
 
-# Imports
-using FITSIO
-
 # Exports
-export SpecData, SpecData1d, SpecData2d, Echellogram, RawSpecData2d, MedianCal2d
+export SpecData, SpecData1d, SpecData2d, RawSpecData2d, MedianCal2d
 export get_spectrograph, get_spec_module
 export read_header, read_image, read_spec1d!
 export parse_exposure_start_time, parse_itime, parse_object, parse_sky_coord, parse_utdate, parse_airmass, parse_image_num
 export get_orders, ordermin, ordermax
-export get_λsolution_estimate
-
-# Empty fits header
-FITSIO.FITSHeader() = FITSHeader(String[], [], String[])
 
 """
 An abstract type for all Echelle spectra, parametrized by the spectrograph symbol S.
@@ -22,7 +15,6 @@ abstract type SpecData{S} end
 An abstract type for all 2d spectra with alias `Echellogram`.
 """
 abstract type SpecData2d{S} <: SpecData{S} end
-const Echellogram{S} = SpecData2d{S}
 
 """
     get_spectrograph(data::SpecData)
@@ -50,7 +42,7 @@ Concrete type for 1D (extracted) spectral data.
 struct SpecData1d{S} <: SpecData{S}
     fname::String
     header::FITSHeader
-    data::Dict{String, Any}
+    data::Dict{String, <:Any}
 end
 
 function Base.getproperty(d::SpecData1d, key::Symbol)
@@ -59,12 +51,12 @@ function Base.getproperty(d::SpecData1d, key::Symbol)
     elseif string(key) ∈ keys(d.data)
         return d.data[string(key)]
     else
-        @error "Could not get property $key of data SpecData1d object"
+        error("Could not get property $key of $d")
     end
 end
 
 function Base.setproperty!(d::SpecData1d, key::Symbol, val)
-    if key ∈ (:λ, :spec, :specerr)
+    if key ∈ (:λ, :spec, :specerr, :good)
         d.data[string(key)] = val
     else
         setfield!(d, key, val)
@@ -111,7 +103,7 @@ Concrete type for a median calibration frame which is constructed by combining m
 """
 struct MedianCal2d{S} <: SpecData2d{S}
     fname::String
-    group::Vector{SpecData2d{S}}
+    group::Vector{RawSpecData2d{S}}
 end
 
 
@@ -120,7 +112,6 @@ function MedianCal2d(fname::String, group::Vector{<:SpecData2d})
     return data
 end
 
-const Echellogram = SpecData2d
 
 # Print
 Base.show(io::IO, d::SpecData1d) = print(io, "SpecData1d: $(basename(d.fname))")
@@ -142,7 +133,7 @@ Reads in an image.
 function read_image end
 
 """
-Reads in the extracted 1D data.
+Reads in the extracted 1d data.
 """
 function read_spec1d! end
 
@@ -201,14 +192,6 @@ function Base.merge!(h1::FITSHeader, h2::FITSHeader)
             h1[key2] = h2[key2]
         end
     end
-end
-
-function merge_headers_from_empty!(h1::FITSHeader, h2::FITSHeader)
-    h1.comments = h2.comments
-    h1.keys = h2.keys
-    h1.map = h2.map
-    h1.values = h2.values
-    nothing
 end
 
 """
