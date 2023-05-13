@@ -5,6 +5,7 @@ export get_spectrograph, get_spec_module
 export read_header, read_image, read_spec1d!
 export parse_exposure_start_time, parse_itime, parse_object, parse_sky_coord, parse_utdate, parse_airmass, parse_image_num
 export get_orders, ordermin, ordermax
+export get_λsolution_estimate
 
 """
 An abstract type for all Echelle spectra, parametrized by the spectrograph symbol S.
