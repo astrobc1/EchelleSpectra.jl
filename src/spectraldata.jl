@@ -6,6 +6,7 @@ export read_header, read_image, read_spec1d!
 export parse_exposure_start_time, parse_itime, parse_object, parse_sky_coord, parse_utdate, parse_airmass, parse_image_num
 export get_orders, ordermin, ordermax
 export get_λsolution_estimate
+export get_timezone
 
 """
 An abstract type for all Echelle spectra, parametrized by the spectrograph symbol S.
@@ -218,3 +219,8 @@ ordermax(data::SpecData) = maximum(get_orders(data))
 Returns the approximate wavelength solution for a 1D spectrum. For spectral modeling purposes, this should typically be accurate to within 1-2 detector pixels.
 """
 function get_λsolution_estimate end
+
+"""
+    Gets the utc offset.
+"""
+function get_timezone end
