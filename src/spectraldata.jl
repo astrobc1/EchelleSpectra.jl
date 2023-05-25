@@ -213,13 +213,6 @@ Returns the maximum echelle order.
 """
 ordermax(data::SpecData) = maximum(get_orders(data))
 
-
-"""
-    get_λsolution_estimate
-Returns the approximate wavelength solution for a 1D spectrum. For spectral modeling purposes, this should typically be accurate to within 1-2 detector pixels.
-"""
-function get_λsolution_estimate end
-
 """
     Gets the utc offset.
 """
