@@ -1,10 +1,13 @@
 module EchelleSpectra
 
+# Imports
 using FITSIO
+using PyCall
 
-# Empty fits header
-FITSIO.FITSHeader() = FITSHeader(String[], [], String[])
-
+# Includes
+include("spectralregion.jl")
 include("spectraldata.jl")
+include("barycenter.jl")
+include("parsing.jl")
 
 end

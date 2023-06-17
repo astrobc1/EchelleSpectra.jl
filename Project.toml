@@ -5,6 +5,9 @@ version = "0.2.0"
 
 [deps]
 FITSIO = "525bcba6-941b-5504-bd06-fd0dc1a4d2eb"
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
 
 [compat]
-julia = "1.8"
+FITSIO = "0.17.1"
+PyCall = "1.95.2"
+julia = "1.9"
