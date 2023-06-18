@@ -1,7 +1,7 @@
 
 export read_fitsimage, read_fitstable
 export read_header
-export read_image, read_spec1D!
+export read_image, read_spec1d!
 
 export parse_exposure_start_time,
        parse_itime,
@@ -63,10 +63,10 @@ end
 
 
 """
-    read_spec1D!(data::SpecData1D, ::SpecRegion1D)
+    read_spec1d!(data::SpecData1D, ::SpecRegion1D)
 Reads in an extracted 1D spectrum (λ, spectrum, spectrum errors, etc.) and stores data products in the dictionary `data.data`. Must be implemented for a given spectrograph.
 """
-read_spec1D!(data::SpecData1D, ::SpecRegion1D) = error("Must implement method `read_spec1D!(data::SpecData1D{:spectrograph}, sregion::SpecRegion1D)` for $(get_spectrograph(data))!")
+read_spec1d!(data::SpecData1D, ::SpecRegion1D) = error("Must implement method `read_spec1d!(data::SpecData1D{:spectrograph}, sregion::SpecRegion1D)` for $(get_spectrograph(data))!")
 
 
 """
