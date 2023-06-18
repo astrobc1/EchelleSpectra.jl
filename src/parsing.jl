@@ -117,19 +117,19 @@ end
 
 
 """
-    read_fitsheader(fname::String, hdu::Int=1)
-    read_fitsheader(data::SpecData, hdu::Int=1)
+    read_header(fname::String, hdu::Int=1)
+    read_header(data::SpecData, hdu::Int=1)
 Reads in a FITS file header.
 """
-function read_fitsheader(fname::String, hdu::Int=1)
+function read_header(fname::String, hdu::Int=1)
     f = FITS(fname)
-    h = read_header(f[hdu])
+    h = FITSIO.read_header(f[hdu])
     close(f)
     return h
 end
 
 
-read_fitsheader(data::SpecData, hdu::Int=1) = read_fitsheader(data.fname, hdu)
+read_header(data::SpecData, hdu::Int=1) = read_header(data.fname, hdu)
 
 
 #####################
