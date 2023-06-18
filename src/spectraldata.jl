@@ -1,5 +1,6 @@
 export SpecData, SpecData1D, SpecData2D
 export RawSpecData2D, CalGroup2D
+export SpecSeries1D
 export get_spectrograph, get_spec_module
 
 
@@ -80,6 +81,8 @@ function SpecData1D(fname::String, spectrograph::String, sregion::SpecRegion1D)
     read_spec1D!(data, sregion)
     return data
 end
+
+const SpecSeries1D{S} = Vector{<:SpecData1D{S}}
 
 
 #############################
