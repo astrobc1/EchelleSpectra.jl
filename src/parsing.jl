@@ -33,8 +33,8 @@ end
 
 
 """
-    read_fitstable(fname::String, hdu::Int, dtype::Type=Float64)
-Reads in an FITS table extension from filename `fname`, HDU `hdu`, and column name `label`, then casts to `dtype`.
+    read_fitstable(fname::String, hdu::Int, label::String; mask_negative=true)
+Reads in an FITS table extension from filename `fname`, HDU `hdu`, and column name `label`.
 """
 function read_fitstable(fname::String, hdu::Int, label::String; mask_negative=true)
     f = FITS(fname)
@@ -91,8 +91,8 @@ end
     correct_readmath(data::AbstractArray{<:Real}; bzero::Real, bscale::Real)
 Corrects bzero and bscale.
 """
-function correct_readmath(data::AbstractArray{<:Real}; bzero::Real, bscale::Real)
-    data = (data .- bzero) ./ bscale
+function correct_readmath(data::AbstractArray{<:Real}; bzero::Real=0, bscale::Real=1, ndr::Real=1)
+    data = (data .- bzero) ./ (bscale * ndr)
     return data
 end
 
@@ -117,11 +117,11 @@ end
 
 
 """
-    read_header(fname::String, hdu::Int=1)
-    read_header(data::SpecData, hdu::Int=1)
+    read_fitsheader(fname::String, hdu::Int=1)
+    read_fitsheader(data::SpecData, hdu::Int=1)
 Reads in a FITS file header.
 """
-function read_header(fname::String, hdu::Int=1)
+function read_fitsheader(fname::String, hdu::Int=1)
     f = FITS(fname)
     h = read_header(f[hdu])
     close(f)
@@ -129,7 +129,7 @@ function read_header(fname::String, hdu::Int=1)
 end
 
 
-read_header(data::SpecData, hdu::Int=1) = read_header(data.fname, hdu)
+read_fitsheader(data::SpecData, hdu::Int=1) = read_fitsheader(data.fname, hdu)
 
 
 #####################

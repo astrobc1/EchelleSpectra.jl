@@ -7,7 +7,7 @@ export get_spectrograph, get_spec_module
 """
 Abstract type for echelle spectral data, parametrized by the spectrograph symbol `S`.
 """
-abstract type SpecData{S<:Symbol} end
+abstract type SpecData{S} end
 
 
 """
