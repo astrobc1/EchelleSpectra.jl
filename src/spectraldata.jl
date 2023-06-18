@@ -32,9 +32,9 @@ struct RawSpecData2D{S} <: SpecData2D{S}
 end
 
 function RawSpecData2D(fname::String, spectrograph::String)
-    specsym = Symbol(lowercase(spectrograph))
-    header = read_header(fname, Val(specsym), RawSpecData2D)
-    data = RawSpecData2D{specsym}(fname, header)
+    data = RawSpecData2D{Symbol(lowercase(spectrograph))}(fname, FITSHeader())
+    header = read_header(data)
+    merge!(data.header, header)
     return data
 end
 
@@ -52,10 +52,10 @@ Type for a calibration frame which is to be constructed by combining multiple in
 struct CalGroup2D{S} <: SpecData2D{S}
     fname::String
     group::Vector{<:RawSpecData2D{S}}
+    header::FITSHeader
 end
 
-CalGroup2D(fname::String, group::Vector{<:SpecData2D}) = CalGroup2D{Symbol(lowercase(get_spectrograph(group[1])))}(fname, group)
-
+CalGroup2D(fname::String, group::Vector{<:SpecData2D}) = CalGroup2D{Symbol(lowercase(get_spectrograph(group[1])))}(fname, group, deepcopy(group[1].header))
 
 """
 Type for 1D (extracted) spectral data.
@@ -76,9 +76,10 @@ end
 
 function SpecData1D(fname::String, spectrograph::String, sregion::SpecRegion1D)
     specsym = Symbol(lowercase(spectrograph))
-    header = read_header(fname, Val(specsym), SpecData1D)
-    data = SpecData1D{specsym}(fname, header, Dict{String, Any}())
-    read_spec1D!(data, sregion)
+    data = SpecData1D{specsym}(fname, FITSHeader(), Dict{String, Any}())
+    header = read_header(data)
+    merge!(data.header, header)
+    read_spec1d!(data, sregion)
     return data
 end
 
@@ -93,7 +94,7 @@ const SpecSeries1D{S} = Vector{<:SpecData1D{S}}
     get_spectrograph(data::SpecData)
 Returns the name of the spectrograph for this `SpecData` object as a string.
 """
-get_spectrograph(::SpecData{S}) where {S<:Symbol} = string(S)
+get_spectrograph(::SpecData{S}) where {S} = string(S)
 
 
 """

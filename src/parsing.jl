@@ -2,6 +2,7 @@
 export read_fitsimage, read_fitstable
 export read_header
 export read_image, read_spec1d!
+export correct_readmath
 
 export parse_exposure_start_time,
        parse_itime,
@@ -13,6 +14,40 @@ export parse_exposure_start_time,
        parse_image_num
 
 export get_timezone, get_orders, get_dark_current, get_read_noise
+
+
+
+####################
+#### FITSIO EXT ####
+####################
+
+
+# Empty fits header
+FITSIO.FITSHeader() = FITSHeader(String[], [], String[])
+
+# Merge fits headers
+function Base.merge!(h1::FITSHeader, h2::FITSHeader)
+    for key2 ∈ h2.keys
+        if key2 ∉ h1.keys
+            h1[key2] = h2[key2]
+        end
+    end
+end
+
+
+"""
+    read_header(fname::String, hdu::Int=1)
+    read_header(data::SpecData, hdu::Int=1)
+Reads in a FITS file header.
+"""
+function read_header(fname::String, hdu::Int=1)
+    f = FITS(fname)
+    h = FITSIO.read_header(f[hdu])
+    close(f)
+    return h
+end
+
+read_header(data::SpecData, hdu::Int=1) = read_header(data.fname, hdu)
 
 
 """
@@ -107,30 +142,15 @@ function correct_readmath(data::SpecData, image::AbstractArray{<:Real})
     else
         bscale = 1
     end
-    return correct_readmath(image; bzero, bscale)
+    if "NDR" in keys(data.header)
+        ndr = parse(Float64, data.header["NDR"])
+    else
+        ndr = 1
+    end
+    return correct_readmath(image; bzero, bscale, ndr)
 end
 
-
-####################
-#### FITSIO EXT ####
-####################
-
-
-"""
-    read_header(fname::String, hdu::Int=1)
-    read_header(data::SpecData, hdu::Int=1)
-Reads in a FITS file header.
-"""
-function read_header(fname::String, hdu::Int=1)
-    f = FITS(fname)
-    h = FITSIO.read_header(f[hdu])
-    close(f)
-    return h
-end
-
-
-read_header(data::SpecData, hdu::Int=1) = read_header(data.fname, hdu)
-
+Base.parse(::Type{Float64}, val::Real) = Float64(val)
 
 #####################
 #### PARSING API ####
@@ -186,12 +206,12 @@ function parse_image_num end
 
 
 # Forwrd methods to parse from filenames
-parse_from_file(f::Function, fname::String, spectrograph::String, t::Type) = f(t(fname, spectrograph))
-parse_itime(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_itime, fname, spectrograph, t)
-parse_utdate(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_utdate, fname, spectrograph, t)
-parse_sky_coord(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_sky_coord, fname, spectrograph, t)
-parse_exposure_start_time(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_exposure_start_time, fname, spectrograph, t)
-parse_image_num(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_image_num, fname, spectrograph, t)
+# parse_from_file(f::Function, fname::String, spectrograph::String, t::Type) = f(t(fname, spectrograph))
+# parse_itime(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_itime, fname, spectrograph, t)
+# parse_utdate(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_utdate, fname, spectrograph, t)
+# parse_sky_coord(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_sky_coord, fname, spectrograph, t)
+# parse_exposure_start_time(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_exposure_start_time, fname, spectrograph, t)
+# parse_image_num(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_image_num, fname, spectrograph, t)
 
 
 """
