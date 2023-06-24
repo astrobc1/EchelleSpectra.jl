@@ -51,8 +51,8 @@ read_header(data::SpecData, hdu::Int=1) = read_header(data.fname, hdu)
 
 
 """
-    read_fitsimage(fname::String, hdu::Int, dtype::Type=Float64)
-Reads in an image HDU from filename `fname` and HDU `hdu`, then casts to `dtype`. If `mask_negative=true`, negative values are set to NaN.
+    read_fitsimage(fname::String, hdu::Int; mask_negative=true)
+Reads in an image HDU from filename `fname` and HDU `hdu`, then casts to `Float64`. If `mask_negative=true`, negative values are set to NaN.
 """
 function read_fitsimage(fname::String, hdu::Int; mask_negative=true)
     f = FITS(fname)
@@ -69,7 +69,7 @@ end
 
 """
     read_fitstable(fname::String, hdu::Int, label::String; mask_negative=true)
-Reads in an FITS table extension from filename `fname`, HDU `hdu`, and column name `label`.
+Reads in an FITS table extension from filename `fname`, HDU `hdu`, and column name `label`.  If `mask_negative=true`, negative values are set to NaN.
 """
 function read_fitstable(fname::String, hdu::Int, label::String; mask_negative=true)
     f = FITS(fname)
@@ -85,12 +85,12 @@ end
 
 
 """
-    read_image(data::SpecData2D; hdu::Int, dtype=Float64)
-    read_image(fname::String, spectrograph::String, dtype::Type)
-Read in a FITS image extension in `hdu` for `data` and cast to `dtype`.
+    read_image(data::SpecData2D, hdu::Int)
+    read_image(fname::String, dtype::Type)
+Read in a FITS image extension in `hdu` for `data`.
 """
 read_image(data::SpecData2D, hdu::Int; kwargs...) = read_fitsimage(data.fname, hdu; kwargs...)
-function read_image(fname::String, spectrograph::String, dtype::Type)
+function read_image(fname::String, dtype::Type)
     data = dtype(fname, spectrograph)
     return read_image(data)
 end
@@ -205,13 +205,15 @@ Parses the observation number (if relevant) (e.g., img0001.fits -> 1).
 function parse_image_num end
 
 
-# Forwrd methods to parse from filenames
-# parse_from_file(f::Function, fname::String, spectrograph::String, t::Type) = f(t(fname, spectrograph))
-# parse_itime(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_itime, fname, spectrograph, t)
-# parse_utdate(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_utdate, fname, spectrograph, t)
-# parse_sky_coord(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_sky_coord, fname, spectrograph, t)
-# parse_exposure_start_time(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_exposure_start_time, fname, spectrograph, t)
-# parse_image_num(fname::String, spectrograph::String, t::Type) = parse_from_file(parse_image_num, fname, spectrograph, t)
+# Parsing from files
+parse_itime(fname::String, dtype::DataType) = parse_itime(dtype(fname))
+parse_object(fname::String, dtype::DataType) = parse_object(dtype(fname))
+parse_objects(fname::String, dtype::DataType) = parse_objects(dtype(fname))
+parse_utdate(fname::String, dtype::DataType) = parse_utdate(dtype(fname))
+parse_sky_coord(fname::String, dtype::DataType) = parse_sky_coord(dtype(fname))
+parse_exposure_start_time(fname::String, dtype::DataType) = parse_exposure_start_time(dtype(fname))
+parse_airmass(fname::String, dtype::DataType) = parse_airmass(dtype(fname))
+parse_image_num(fname::String, dtype::DataType) = parse_image_num(dtype(fname))
 
 
 """
