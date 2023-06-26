@@ -10,6 +10,10 @@ The default implementation is for an unweighted midpoint, computed as:
     get_exposure_midpoint(data::SpecData) = parse_exposure_start_time(data) + parse_itime(data) / (2 * 86400)
 """
 get_exposure_midpoint(data::SpecData) = parse_exposure_start_time(data) + parse_itime(data) / (2 * 86400)
+function get_exposure_midpoint(fname::String, dtype::DataType)
+    data = dtype.name.wrapper(fname, string(dtype.parameters[1]))
+    return parse_exposure_start_time(data) + parse_itime(data) / (2 * 86400)
+end
 
 
 """
@@ -41,3 +45,5 @@ function get_barycentric_corrections(jdmid::Real, obs_name::String, star_name::S
     bc_vel = BARYCORRPY.get_BC_vel(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true, zmeas=zmeas)[1][1]
     return bjd, bc_vel
 end
+
+get_barycentric_corrections(fname::String, dtype::DataType; star_name, obs_name, store=false, zmeas=0.0) = get_barycentric_corrections(dtype.name.wrapper(fname, string(dtype.parameters[1])); star_name, obs_name, store, zmeas)

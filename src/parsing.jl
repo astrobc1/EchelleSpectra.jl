@@ -90,8 +90,8 @@ end
 Read in a FITS image extension in `hdu` for `data`.
 """
 read_image(data::SpecData2D, hdu::Int; kwargs...) = read_fitsimage(data.fname, hdu; kwargs...)
-function read_image(fname::String, dtype::Type)
-    data = dtype(fname, spectrograph)
+function read_image(fname::String, dtype::DataType)
+    data = dtype.name.wrapper(fname, spectrograph)
     return read_image(data)
 end
 
@@ -206,14 +206,14 @@ function parse_image_num end
 
 
 # Parsing from files
-parse_itime(fname::String, dtype::DataType) = parse_itime(dtype(fname))
-parse_object(fname::String, dtype::DataType) = parse_object(dtype(fname))
-parse_objects(fname::String, dtype::DataType) = parse_objects(dtype(fname))
-parse_utdate(fname::String, dtype::DataType) = parse_utdate(dtype(fname))
-parse_sky_coord(fname::String, dtype::DataType) = parse_sky_coord(dtype(fname))
-parse_exposure_start_time(fname::String, dtype::DataType) = parse_exposure_start_time(dtype(fname))
-parse_airmass(fname::String, dtype::DataType) = parse_airmass(dtype(fname))
-parse_image_num(fname::String, dtype::DataType) = parse_image_num(dtype(fname))
+parse_itime(fname::String, dtype::DataType) = parse_itime(dtype.name.wrapper(fname, string(dtype.parameters[1])))
+parse_object(fname::String, dtype::DataType) = parse_object(dtype.name.wrapper(fname), string(dtype.parameters[1]))
+parse_objects(fname::String, dtype::DataType) = parse_objects(dtype.name.wrapper(fname), string(dtype.parameters[1]))
+parse_utdate(fname::String, dtype::DataType) = parse_utdate(dtype.name.wrapper(fname), string(dtype.parameters[1]))
+parse_sky_coord(fname::String, dtype::DataType) = parse_sky_coord(dtype.name.wrapper(fname), string(dtype.parameters[1]))
+parse_exposure_start_time(fname::String, dtype::DataType) = parse_exposure_start_time(dtype.name.wrapper(fname), string(dtype.parameters[1]))
+parse_airmass(fname::String, dtype::DataType) = parse_airmass(dtype.name.wrapper(fname), string(dtype.parameters[1]))
+parse_image_num(fname::String, dtype::DataType) = parse_image_num(dtype.name.wrapper(fname), string(dtype.parameters[1]))
 
 
 """

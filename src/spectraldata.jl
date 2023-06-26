@@ -83,6 +83,14 @@ function SpecData1D(fname::String, spectrograph::String, sregion::SpecRegion1D)
     return data
 end
 
+function SpecData1D(fname::String, spectrograph::String)
+    specsym = Symbol(lowercase(spectrograph))
+    data = SpecData1D{specsym}(fname, FITSHeader(), Dict{String, Any}())
+    header = read_header(data)
+    merge!(data.header, header)
+    return data
+end
+
 const SpecSeries1D{S} = Vector{<:SpecData1D{S}}
 
 
