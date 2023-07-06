@@ -72,12 +72,12 @@ end
 
 
 """
-    read_fitstable(fname::String, hdu::Int, label::String; mask_negative=true)
-Reads in an FITS table extension from filename `fname`, HDU `hdu`, and column name `label`.  If `mask_negative=true`, negative values are set to NaN.
+    read_fitstable(fname::String, hdu::Int, column::String; mask_negative=true)
+Reads in an FITS table extension from filename `fname`, HDU `hdu`, and column name `column`.  If `mask_negative=true`, negative values are set to NaN.
 """
-function read_fitstable(fname::String; hdu::Int=1, label::String, mask_negative::Bool=true)
+function read_fitstable(fname::String; hdu::Int=1, column::String, mask_negative::Bool=true)
     f = FITS(fname)
-    data = read(f[hdu], label)
+    data = read(f[hdu], column)
     close(f)
     data = Float64.(data)
     if mask_negative
