@@ -58,7 +58,7 @@ read_header(data::SpecData; hdu::Int=1) = read_header(data.fname, hdu)
     read_fitsimage(fname::String, hdu::Int; mask_negative=true)
 Reads in an image HDU from filename `fname` and HDU `hdu`, then casts to `Float64`. If `mask_negative=true`, negative values are set to NaN.
 """
-function read_fitsimage(fname::String, hdu::Int; mask_negative=true)
+function read_fitsimage(fname::String; hdu::Int=1, mask_negative::Bool=true)
     f = FITS(fname)
     data = read(f[hdu])
     close(f)
@@ -75,7 +75,7 @@ end
     read_fitstable(fname::String, hdu::Int, label::String; mask_negative=true)
 Reads in an FITS table extension from filename `fname`, HDU `hdu`, and column name `label`.  If `mask_negative=true`, negative values are set to NaN.
 """
-function read_fitstable(fname::String, hdu::Int, label::String; mask_negative=true)
+function read_fitstable(fname::String; hdu::Int=1, label::String, mask_negative::Bool=true)
     f = FITS(fname)
     data = read(f[hdu], label)
     close(f)
