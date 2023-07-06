@@ -34,7 +34,6 @@ function Base.merge!(h1::FITSHeader, h2::FITSHeader)
     end
 end
 
-
 """
     read_header(fname::String, hdu::Int=1)
     read_header(data::SpecData, hdu::Int=1)
@@ -47,7 +46,12 @@ function read_header(fname::String, hdu::Int=1)
     return h
 end
 
-read_header(data::SpecData, hdu::Int=1) = read_header(data.fname, hdu)
+
+#####################
+#### API METHODS ####
+#####################
+
+read_header(data::SpecData; hdu::Int=1) = read_header(data.fname, hdu)
 
 
 """
@@ -89,7 +93,7 @@ end
     read_image(fname::String, dtype::Type)
 Read in a FITS image extension in `hdu` for `data`.
 """
-read_image(data::SpecData2D, hdu::Int; kwargs...) = read_fitsimage(data.fname, hdu; kwargs...)
+read_image(data::SpecData2D, hdu::Int=1; kwargs...) = read_fitsimage(data.fname, hdu; kwargs...)
 function read_image(fname::String, dtype::DataType)
     data = dtype.name.wrapper(fname, spectrograph)
     return read_image(data)
@@ -102,24 +106,6 @@ end
 Reads in an extracted 1D spectrum (λ, spectrum, spectrum errors, etc.) and stores data products in the dictionary `data.data`. Must be implemented for a given spectrograph.
 """
 read_spec1d!(data::SpecData1D, ::SpecRegion1D) = error("Must implement method `read_spec1d!(data::SpecData1D{:spectrograph}, sregion::SpecRegion1D)` for $(get_spectrograph(data))!")
-
-
-"""
-    Base.clamp!(image::Matrix; lo::Real, hi::Real, vlo::Real=lo, vhi::Real=hi)
-Pixel values `< lo` are replaced with `vlo`, pixel values `> hi` are replaced with `vhi`.
-"""
-function Base.clamp!(data::AbstractArray{<:Real}; lo::Real, hi::Real, vlo=NaN, vhi=NaN)
-    if isfinite(lo) && !isnothing(vlo) && vlo !== -Inf
-        bad = findall(data .< lo)
-        data[bad] .= vlo
-    end
-    if isfinite(hi) && !isnothing(vhi) && vhi !== Inf
-        bad = findall(data .> hi)
-        data[bad] .= vhi
-    end
-    return data
-end
-
 
 """
     correct_readmath(data::SpecData, image::AbstractArray{<:Real})
@@ -212,7 +198,7 @@ parse_objects(fname::String, dtype::DataType) = parse_objects(dtype.name.wrapper
 parse_utdate(fname::String, dtype::DataType) = parse_utdate(dtype.name.wrapper(fname), string(dtype.parameters[1]))
 parse_sky_coord(fname::String, dtype::DataType) = parse_sky_coord(dtype.name.wrapper(fname), string(dtype.parameters[1]))
 parse_exposure_start_time(fname::String, dtype::DataType) = parse_exposure_start_time(dtype.name.wrapper(fname), string(dtype.parameters[1]))
-parse_airmass(fname::String, dtype::DataType) = parse_airmass(dtype.name.wrapper(fname), string(dtype.parameters[1]))
+parse_airmass(fname::String, dtype::DataType) = parse_airmass(dtype.name.wrapper(fname, string(dtype.parameters[1])))
 parse_image_num(fname::String, dtype::DataType) = parse_image_num(dtype.name.wrapper(fname), string(dtype.parameters[1]))
 
 
