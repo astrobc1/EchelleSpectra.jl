@@ -35,11 +35,11 @@ function Base.merge!(h1::FITSHeader, h2::FITSHeader)
 end
 
 """
-    read_header(fname::String, hdu::Int=1)
-    read_header(data::SpecData, hdu::Int=1)
+    read_header(fname::String; hdu::Int=1)
+    read_header(data::SpecData; hdu::Int=1)
 Reads in a FITS file header.
 """
-function read_header(fname::String, hdu::Int=1)
+function read_header(fname::String; hdu::Int=1)
     f = FITS(fname)
     h = FITSIO.read_header(f[hdu])
     close(f)
@@ -51,11 +51,11 @@ end
 #### API METHODS ####
 #####################
 
-read_header(data::SpecData; hdu::Int=1) = read_header(data.fname, hdu)
+read_header(data::SpecData; hdu::Int=1) = read_header(data.fname; hdu)
 
 
 """
-    read_fitsimage(fname::String, hdu::Int; mask_negative=true)
+    read_fitsimage(fname::String; hdu::Int=1, mask_negative::Bool=true)
 Reads in an image HDU from filename `fname` and HDU `hdu`, then casts to `Float64`. If `mask_negative=true`, negative values are set to NaN.
 """
 function read_fitsimage(fname::String; hdu::Int=1, mask_negative::Bool=true)
@@ -93,7 +93,7 @@ end
     read_image(fname::String, dtype::Type)
 Read in a FITS image extension in `hdu` for `data`.
 """
-read_image(data::SpecData2D, hdu::Int=1; kwargs...) = read_fitsimage(data.fname, hdu; kwargs...)
+read_image(data::SpecData2D; hdu::Int=1, mask_negative::Bool=true) = read_fitsimage(data.fname; hdu, mask_negative)
 function read_image(fname::String, dtype::DataType)
     data = dtype.name.wrapper(fname, spectrograph)
     return read_image(data)
@@ -193,13 +193,13 @@ function parse_image_num end
 
 # Parsing from files
 parse_itime(fname::String, dtype::DataType) = parse_itime(dtype.name.wrapper(fname, string(dtype.parameters[1])))
-parse_object(fname::String, dtype::DataType) = parse_object(dtype.name.wrapper(fname), string(dtype.parameters[1]))
-parse_objects(fname::String, dtype::DataType) = parse_objects(dtype.name.wrapper(fname), string(dtype.parameters[1]))
-parse_utdate(fname::String, dtype::DataType) = parse_utdate(dtype.name.wrapper(fname), string(dtype.parameters[1]))
-parse_sky_coord(fname::String, dtype::DataType) = parse_sky_coord(dtype.name.wrapper(fname), string(dtype.parameters[1]))
-parse_exposure_start_time(fname::String, dtype::DataType) = parse_exposure_start_time(dtype.name.wrapper(fname), string(dtype.parameters[1]))
+parse_object(fname::String, dtype::DataType) = parse_object(dtype.name.wrapper(fname, string(dtype.parameters[1])))
+parse_objects(fname::String, dtype::DataType) = parse_objects(dtype.name.wrapper(fname, string(dtype.parameters[1])))
+parse_utdate(fname::String, dtype::DataType) = parse_utdate(dtype.name.wrapper(fname, string(dtype.parameters[1])))
+parse_sky_coord(fname::String, dtype::DataType) = parse_sky_coord(dtype.name.wrapper(fname, string(dtype.parameters[1])))
+parse_exposure_start_time(fname::String, dtype::DataType) = parse_exposure_start_time(dtype.name.wrapper(fname, string(dtype.parameters[1])))
 parse_airmass(fname::String, dtype::DataType) = parse_airmass(dtype.name.wrapper(fname, string(dtype.parameters[1])))
-parse_image_num(fname::String, dtype::DataType) = parse_image_num(dtype.name.wrapper(fname), string(dtype.parameters[1]))
+parse_image_num(fname::String, dtype::DataType) = parse_image_num(dtype.name.wrapper(fname, string(dtype.parameters[1])))
 
 
 """
