@@ -27,7 +27,7 @@ function get_barycentric_corrections(data::SpecData; star_name, obs_name, store=
     jdmid = get_exposure_midpoint(data)
     
     # BJD and BC vel
-    bjd, bc_vel = get_barycentric_corrections(jdmid, obs_name, star_name, zmeas, solar)
+    bjd, bc_vel = get_barycentric_corrections(jdmid, obs_name, star_name, zmeas)
 
     # Store
     if store
