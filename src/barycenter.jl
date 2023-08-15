@@ -27,7 +27,7 @@ function get_barycentric_corrections(data::SpecData; star_name, obs_name, store=
     jdmid = get_exposure_midpoint(data)
     
     # BJD and BC vel
-    bjd, bc_vel = get_barycentric_corrections(jdmid, obs_name, star_name, zmeas)
+    bjd, bc_vel = get_barycentric_corrections(jdmid, obs_name, star_name, zmeas, solar)
 
     # Store
     if store
@@ -41,8 +41,14 @@ end
 
 function get_barycentric_corrections(jdmid::Real, obs_name::String, star_name::String, zmeas::Real=0)
     BARYCORRPY = pyimport("barycorrpy")
-    bjd = BARYCORRPY.utc_tdb.JDUTC_to_BJDTDB(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true)[1][1]
-    bc_vel = BARYCORRPY.get_BC_vel(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true, zmeas=zmeas)[1][1]
+    if lowercase(star_name) == "sun"
+        #bjd = BARYCORRPY.utc_tdb.JDUTC_to_BJDTDB(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true, SolSystemTarget="Sun")[1][1]
+        bjd = BARYCORRPY.utc_tdb.JDUTC_to_BJDTDB(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true)[1][1]
+        bc_vel = BARYCORRPY.get_BC_vel(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true, zmeas=zmeas, SolSystemTarget="Sun")[1][1]
+    else
+        bjd = BARYCORRPY.utc_tdb.JDUTC_to_BJDTDB(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true)[1][1]
+        bc_vel = BARYCORRPY.get_BC_vel(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true, zmeas=zmeas)[1][1]
+    end
     return bjd, bc_vel
 end
 
