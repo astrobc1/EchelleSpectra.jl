@@ -43,7 +43,8 @@ function get_barycentric_corrections(jdmid::Real, obs_name::String, star_name::S
     BARYCORRPY = pyimport("barycorrpy")
     if lowercase(star_name) == "sun"
         #bjd = BARYCORRPY.utc_tdb.JDUTC_to_BJDTDB(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true, SolSystemTarget="Sun")[1][1]
-        bjd = BARYCORRPY.utc_tdb.JDUTC_to_BJDTDB(JDUTC=jdmid, starname=nothing, obsname=obs_name, leap_update=true, SolSystemTarget="Sun")[1][1]
+        #bjd = BARYCORRPY.utc_tdb.JDUTC_to_BJDTDB(JDUTC=jdmid, starname=nothing, obsname=obs_name, leap_update=true)[1][1]
+        bjd = jdmid
         bc_vel = BARYCORRPY.get_BC_vel(JDUTC=jdmid, starname=nothing, obsname=obs_name, leap_update=true, zmeas=zmeas, SolSystemTarget="Sun")[1][1]
     else
         bjd = BARYCORRPY.utc_tdb.JDUTC_to_BJDTDB(JDUTC=jdmid, starname=star_name, obsname=obs_name, leap_update=true)[1][1]
