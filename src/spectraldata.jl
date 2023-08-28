@@ -11,13 +11,13 @@ abstract type SpecData{S} end
 
 
 """
-Abstract type for echellograms.
+Abstract type for all echellograms.
 """
 abstract type SpecData2D{S} <: SpecData{S} end
 
 
 """
-Type for a raw echellogram.
+Concrete type for a raw echellogram.
 
 # Fields
 - `fname::String` - The full path + filename.
