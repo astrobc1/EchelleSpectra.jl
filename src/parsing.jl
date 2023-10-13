@@ -94,11 +94,7 @@ end
 Read in a FITS image extension in `hdu` for `data`.
 """
 read_image(data::SpecData2D; hdu::Int=1, mask_negative::Bool=true) = read_fitsimage(data.fname; hdu, mask_negative)
-function read_image(fname::String, dtype::DataType)
-    data = dtype.name.wrapper(fname, spectrograph)
-    return read_image(data)
-end
-
+read_image(fname::String, dtype::DataType) = read_image(dtype.name.wrapper(fname, spectrograph))
 
 
 """
@@ -112,10 +108,7 @@ read_spec1d!(data::SpecData1D, ::SpecRegion1D) = error("Must implement method `r
     correct_readmath(data::AbstractArray{<:Real}; bzero::Real, bscale::Real)
 Corrects bzero and bscale.
 """
-function correct_readmath(data::AbstractArray{<:Real}; bzero::Real=0, bscale::Real=1, ndr::Real=1)
-    data = (data .- bzero) ./ (bscale * ndr)
-    return data
-end
+correct_readmath(image::AbstractArray{<:Real}; bzero::Real=0, bscale::Real=1, ndr::Real=1) = (image .- bzero) ./ (bscale * ndr)
 
 function correct_readmath(data::SpecData, image::AbstractArray{<:Real})
     if "BZERO" in keys(data.header)
@@ -193,34 +186,17 @@ function parse_image_num end
 
 # Parsing from files
 parse_itime(fname::String, dtype::DataType) = parse_itime(dtype.name.wrapper(fname, string(dtype.parameters[1])))
+
 parse_object(fname::String, dtype::DataType) = parse_object(dtype.name.wrapper(fname, string(dtype.parameters[1])))
+
 parse_objects(fname::String, dtype::DataType) = parse_objects(dtype.name.wrapper(fname, string(dtype.parameters[1])))
+
 parse_utdate(fname::String, dtype::DataType) = parse_utdate(dtype.name.wrapper(fname, string(dtype.parameters[1])))
+
 parse_sky_coord(fname::String, dtype::DataType) = parse_sky_coord(dtype.name.wrapper(fname, string(dtype.parameters[1])))
+
 parse_exposure_start_time(fname::String, dtype::DataType) = parse_exposure_start_time(dtype.name.wrapper(fname, string(dtype.parameters[1])))
+
 parse_airmass(fname::String, dtype::DataType) = parse_airmass(dtype.name.wrapper(fname, string(dtype.parameters[1])))
+
 parse_image_num(fname::String, dtype::DataType) = parse_image_num(dtype.name.wrapper(fname, string(dtype.parameters[1])))
-
-
-"""
-    Gets the utc offset.
-"""
-function get_timezone end
-
-
-"""
-    Get all echelle orders.
-"""
-function get_orders end
-
-
-"""
-    Get the dark current.
-"""
-function get_dark_current end
-
-
-"""
-    Get the read noise.
-"""
-function get_read_noise end
