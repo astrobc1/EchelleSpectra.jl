@@ -1,13 +1,10 @@
 module EchelleSpectra
 
-# Imports
-using FITSIO
-using PyCall
+using FITSIO, SkyCoords, AstroLib, PyCall
 
-# Includes
-include("spectralregion.jl")
-include("spectraldata.jl")
-include("barycenter.jl")
+include("types.jl")
 include("parsing.jl")
+include("utils.jl")
+include("barycenter.jl")
 
 end
