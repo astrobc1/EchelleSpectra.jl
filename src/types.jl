@@ -49,6 +49,7 @@ Base.show(io::IO, d::SpecData2D) = show(io, (basename(d)))
 Base.show(io::IO, d::CalGroup2D) = show(io, (basename(d)))
 Base.:(==)(d1::SpecData, d2::SpecData) = d1.fname == d2.fname
 
+
 function Base.getproperty(d::SpecData1D, key::Symbol)
     if hasfield(typeof(d), key)
         return getfield(d, key)
