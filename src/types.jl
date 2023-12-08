@@ -34,8 +34,6 @@ struct SpecData1D{S} <: SpecData{S}
     data::Dict{String, Any}
 end
 
-const DEFAULT_KEYS = (:λ, :spec, :specerr, :good)
-
 const SpecSeries1D{S} = Vector{<:SpecData1D{S}}
 
 
@@ -48,22 +46,3 @@ Base.show(io::IO, d::SpecData1D) = show(io, (basename(d)))
 Base.show(io::IO, d::SpecData2D) = show(io, (basename(d)))
 Base.show(io::IO, d::CalGroup2D) = show(io, (basename(d)))
 Base.:(==)(d1::SpecData, d2::SpecData) = d1.fname == d2.fname
-
-
-function Base.getproperty(d::SpecData1D, key::Symbol)
-    if hasfield(typeof(d), key)
-        return getfield(d, key)
-    elseif string(key) ∈ keys(d.data)
-        return d.data[string(key)]
-    else
-        error("Could not get property $key of $d")
-    end
-end
-
-function Base.setproperty!(d::SpecData1D, key::Symbol, val)
-    #if key ∈ DEFAULT_KEYS
-    d.data[string(key)] = val
-    #else
-    #    setfield!(d, key, val)
-    #end
-end
